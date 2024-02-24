@@ -16,7 +16,8 @@
     "typescript": "^5.3.0",
     "@types/react": "~18.2.45",
     "expo-camera": "~14.0.5",
-    "expo-image": "~1.10.6"
+    "expo-image": "~1.10.6",
+    "@react-native-community/netinfo": "11.1.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"

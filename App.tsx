@@ -1,8 +1,11 @@
-import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import NetInfo from '@react-native-community/netinfo';
+
+import { StatusBar } from 'expo-status-bar';
 import { CameraType, CameraView, useCameraPermissions } from 'expo-camera/next';
-import { useEffect, useState } from 'react';
 import { Image } from 'expo-image';
+
+import { useEffect, useState } from 'react';
 
 const Flash_Off = require('./assets/flash_off.svg');
 const Flash_On = require('./assets/flash_on.svg');
@@ -25,6 +28,28 @@ export default function App() {
         await requestPermission();
       }
     })();
+  }, []);
+
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener(state => {
+      console.log('Connection type', state.type);
+      console.log('Is connected?', state.isConnected);
+      console.log('Is internet reachable?', state.isInternetReachable);
+
+      if ( state.isInternetReachable === false ) {
+        alert('No internet connection')
+      }
+
+      if (state.isConnected === false) {
+        alert('No connection')
+      }
+
+    });
+    
+
+    return () => {
+      unsubscribe();
+    };
   }, []);
 
   if (!permission) {
@@ -92,7 +117,7 @@ export default function App() {
           )}
         </TouchableOpacity>
       </View>        
-      <StatusBar style="auto" />
+      <StatusBar style="dark" />
     </View>
   );
 }
