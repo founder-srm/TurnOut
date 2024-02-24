@@ -16,7 +16,6 @@ const FCLogo = require('./assets/fc_logo.png');
 
 export default function App() {
 
-  const [facing, setFacing] = useState('back');
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
   const [isTorchon, setIsTorchon] = useState(false)
