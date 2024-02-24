@@ -1,4 +1,4 @@
-import { StyleSheet, Text, TouchableOpacity, View, Alert } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View, Alert, ActivityIndicator } from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
 
 import { StatusBar } from 'expo-status-bar';
@@ -20,7 +20,7 @@ export default function App() {
   const [scanned, setScanned] = useState(false);
   const [isTorchon, setIsTorchon] = useState(false)
   const [cameraOn, setCameraOn] = useState(true);
-
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -133,13 +133,17 @@ export default function App() {
   }
 
   const giveAttendance = (uuid: string) => {
-    console.log('Attendance given to team of UUID:', uuid);
-    Alert.alert('Attendance given to team of UUID:', uuid);
-    Alert.prompt('Attendance given to team of UUID:', uuid);
-
-    setScanned(false)
-    setCameraOn(true);
-    console.log('ready to scan again  ');
+    setIsLoading(true);
+    setTimeout(() => {
+      console.log('Attendance given to team of UUID:', uuid);
+      Alert.alert('Attendance given to team of UUID:', uuid);
+      Alert.prompt('Attendance given to team of UUID:', uuid);
+      setIsLoading(false);
+      setScanned(false)
+      setCameraOn(true);
+      console.log('ready to scan again  ');
+    }, 3000);
+    
   };
 
   return (
@@ -168,6 +172,8 @@ export default function App() {
           </View>
         )}
       </View>
+
+      <ActivityIndicator animating={isLoading} size="large" color="#fff" />
       
       <View style={styles.buttonContainer}>
         
