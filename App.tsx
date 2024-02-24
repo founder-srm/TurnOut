@@ -8,6 +8,7 @@ const Flash_Off = require('./assets/flash_off.svg');
 const Flash_On = require('./assets/flash_on.svg');
 const Camera_Off = require('./assets/camera_off.svg');
 const Camera_On = require('./assets/camera_on.svg');
+const FCLogo = require('./assets/fc_logo.png');
 
 export default function App() {
 
@@ -37,6 +38,13 @@ export default function App() {
 
   return (
     <View style={styles.container}>
+
+      <Image 
+        source={FCLogo}
+        style={styles.logo}
+        contentFit="contain"
+      />
+
       <View style={styles.cameraContainer}>
         {cameraOn ? (
           <CameraView 
@@ -54,6 +62,7 @@ export default function App() {
           </View>
         )}
       </View>
+      
       <View style={styles.buttonContainer}>
         
         <TouchableOpacity 
@@ -158,4 +167,10 @@ const styles = StyleSheet.create({
     height: 30,
     color: 'white',
   },
+  logo:{
+    width: 130,
+    height: 130,
+    resizeMode: 'contain',
+    margin:0,
+  }
 });
