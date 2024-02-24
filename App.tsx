@@ -114,9 +114,12 @@ export default function App() {
       Alert.alert(`invalid qr`);
       Alert.prompt(`invalid qr`);
 
-      setScanned(false)
-      setCameraOn(true);
-      console.log('ready to scan again  ');
+      setTimeout(() => {
+        setScanned(false)
+        setCameraOn(true);
+        console.log('ready to scan again  ');
+
+      }, 3000)
     }
     
   };
