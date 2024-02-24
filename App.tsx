@@ -58,7 +58,14 @@ export default function App() {
 
   const handleBarCodeScanned = ({ type, data }) => {
     setScanned(true);
+    setCameraOn(false);
     alert(`Bar code with type ${type} and data ${data} has been scanned!`);
+    console.log('scanned');
+    setTimeout(() => {
+      setScanned(false)
+      setCameraOn(true);
+      console.log('ready to scan again  ');
+    } , 2000);
   };
 
   return (
