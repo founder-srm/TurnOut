@@ -173,37 +173,42 @@ export default function App() {
         )}
       </View>
 
-      <ActivityIndicator animating={isLoading} size="large" color="#fff" />
+      <View style={isLoading ?  styles.box : styles.hidden }>
+        {isLoading && <Text style={styles.text}>Marking Present for the Team...</Text>}
+        <ActivityIndicator animating={isLoading} size="large" color="#fff" />
+      </View>
       
-      <View style={styles.buttonContainer}>
-        
-        <TouchableOpacity 
-          style={styles.button} 
-          onPress={() => setCameraOn(prev => !prev)}
-        >
-          <Image 
-            style={styles.icon} 
-            source={cameraOn ? Camera_Off : Camera_On}
-            contentFit="cover"
-          />
-        </TouchableOpacity>
-
-        <TouchableOpacity style={[styles.button, isTorchon && styles.torchon, !cameraOn && styles.buttonDisabled ]} disabled={!cameraOn} onPress={() => setIsTorchon(!isTorchon)}>
-          {isTorchon ? (
-              <Image
-                style={styles.icon}
-                source={Flash_Off}
-                contentFit="cover"            
-              />
-            ) : (
-              <Image
-                style={styles.icon}
-                source={Flash_On}
-                contentFit="cover"            
+      <View style={styles.buttonContainer}>  
+        <View style={{width:30, height:2, backgroundColor:'white' }}></View>
+        <View style={{width:'100%',height:'auto', display:'flex', flexDirection:'row', justifyContent:'center', alignItems:'center'}}>
+          <TouchableOpacity 
+            style={styles.button} 
+            onPress={() => setCameraOn(prev => !prev)}
+          >
+            <Image 
+              style={styles.icon} 
+              source={cameraOn ? Camera_Off : Camera_On}
+              contentFit="cover"
             />
-          )}
-        </TouchableOpacity>
-      </View>        
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.button, isTorchon && styles.torchon, !cameraOn && styles.buttonDisabled ]} disabled={!cameraOn} onPress={() => setIsTorchon(!isTorchon)}>
+            {isTorchon ? (
+                <Image
+                  style={styles.icon}
+                  source={Flash_Off}
+                  contentFit="cover"            
+                />
+              ) : (
+                <Image
+                  style={styles.icon}
+                  source={Flash_On}
+                  contentFit="cover"            
+              />
+            )}
+          </TouchableOpacity>
+        </View>
+      </View>    
+
       <StatusBar style="dark" />
     </View>
   );
@@ -244,14 +249,35 @@ const styles = StyleSheet.create({
     backgroundColor: '#151718',
 
   },
-  buttonContainer: {
-    flex: 1,
-    backgroundColor: 'transparent',
-    flexDirection: 'row',
+  hidden: {
+    display: 'none',
+  },
+  box:{
     width: '100%',
+    height: 'auto',
+    marginHorizontal: 15,
+    display: 'flex',
     justifyContent: 'space-around',
     alignItems: 'center',
-    margin: 0,
+    padding: 6,
+    backgroundColor: 'rgba(25,25,20,0.5)',
+    borderRadius: 10,
+  },
+  buttonContainer: {
+    flex: 1,
+    backgroundColor: 'rgba(25,25,20,0.5)',
+    display: 'flex',
+    flexDirection: 'column',
+    width: '100%',
+    height: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 160,
+    marginBottom: 5,
+    borderWidth: 1,
+    borderColor: 'gray',
+    borderTopRightRadius: 8,
+    borderTopLeftRadius: 8,
   },
   torchon :{
     backgroundColor: 'rgb(216,62,62)',
