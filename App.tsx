@@ -6,6 +6,7 @@ import { CameraType, CameraView, useCameraPermissions } from 'expo-camera/next';
 import { Image } from 'expo-image';
 
 import { useEffect, useState } from 'react';
+import { supabase } from './lib/supabase';
 
 const Flash_Off = require('./assets/flash_off.svg');
 const Flash_On = require('./assets/flash_on.svg');
@@ -127,18 +128,50 @@ export default function App() {
     Alert.prompt('Attendance not given', 'Scan again');
   }
 
-  const giveAttendance = (uuid: string) => {
+  
+  const giveAttendance = async(uuid: string) => {
     setIsLoading(true);
-    setTimeout(() => {
-      console.log('Attendance given to team of UUID:', uuid);
-      ToastAndroid.showWithGravity(`Attendance given to team of UUID: ${uuid}`, ToastAndroid.LONG, ToastAndroid.BOTTOM);
-      Alert.prompt('Attendance given to team of UUID:', uuid);
+    try{
+      const { data, error, status } = await supabase
+        .from('eventsregistration')
+        .select(`attendance`)
+        .eq('qr_id', uuid)
+        .single()
+      if (error && status !== 406) {
+        throw error
+      }
+
+      else {
+        const { attendance } = data;
+        if (attendance === false ) {
+          console.log('attendance', attendance);
+
+          const { error, status } = await supabase
+            .from('eventsregistration')
+            .update({ attendance: true })
+            .eq('qr_id', uuid)
+          if (error && status !== 406) {
+            alert( error)
+          }
+        }
+        else if (attendance === true) {
+          console.log('attendance', attendance);
+          ToastAndroid.showWithGravity('Already Marked Present!!', ToastAndroid.LONG, ToastAndroid.BOTTOM);
+          Alert.prompt('Already Marked Present');
+        }
+      }
+    } catch (error) {
+      console.log('error', error)
+      Alert.prompt('error', error)
+      ToastAndroid.showWithGravity(`error: ${error}`, ToastAndroid.LONG, ToastAndroid.BOTTOM);
+    } finally {
       setIsLoading(false);
       setScanned(false)
       setCameraOn(true);
-    }, 3000);
-    
+    }
   };
+
+
 
   return (
     <ScrollView style={styles.scrollContainer} >
