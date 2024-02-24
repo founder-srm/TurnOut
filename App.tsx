@@ -1,4 +1,4 @@
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View, Alert } from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
 
 import { StatusBar } from 'expo-status-bar';
@@ -37,11 +37,25 @@ export default function App() {
       console.log('Is internet reachable?', state.isInternetReachable);
 
       if ( state.isInternetReachable === false ) {
-        alert('No internet connection')
+        Alert.alert(
+          'Network Error',
+          'Bad Connectivity'
+          )
+        Alert.prompt(
+          'Network Error',
+          'Bad Connectivity'
+          )
       }
 
       if (state.isConnected === false) {
-        alert('No connection')
+        Alert.alert(
+          'Network Error',
+          'No internet connection'
+          )
+        Alert.prompt(
+          'Network Error',
+          'No internet connection'
+          )
       }
 
     });
@@ -56,16 +70,73 @@ export default function App() {
     return <Text>No access to camera</Text>;
   }
 
+  function isUUID(value: string): boolean {
+    const uuidRegex = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/;
+    return uuidRegex.test(value);
+  }
+
   const handleBarCodeScanned = ({ type, data }) => {
     setScanned(true);
     setCameraOn(false);
-    alert(`Bar code with type ${type} and data ${data} has been scanned!`);
-    console.log('scanned');
-    setTimeout(() => {
+    if (isUUID(data)) {
+
+      Alert.alert(
+        'Successful Scan!',
+        `Team of UUID :${data} has been scanned!`,
+        [
+          {
+            text: 'Give Attendance',
+            onPress: () => giveAttendance(data),
+            style: 'default',
+          },
+          {
+            text: 'Cancel',
+            onPress: () => handleCancel(),
+            style: 'cancel',
+          },
+        ],
+        
+      );
+      
+      Alert.prompt(
+        'Successful Scan!',
+        `Team of UUID :${data} has been scanned!`,
+        [
+          {
+            text: 'Cancel',
+            onPress: () => handleCancel(),
+            style: 'cancel',
+          },
+        ],
+        
+      );
+    } else {
+      Alert.alert(`invalid qr`);
+      Alert.prompt(`invalid qr`);
+
       setScanned(false)
       setCameraOn(true);
       console.log('ready to scan again  ');
-    } , 2000);
+    }
+    
+  };
+
+  const handleCancel = () => {
+    setScanned(false)
+    setCameraOn(true);
+    Alert.alert('Attendance not given', 'Scan again');
+    Alert.prompt('Attendance not given', 'Scan again');
+    console.log('ready to scan again  ');
+  }
+
+  const giveAttendance = (uuid: string) => {
+    console.log('Attendance given to team of UUID:', uuid);
+    Alert.alert('Attendance given to team of UUID:', uuid);
+    Alert.prompt('Attendance given to team of UUID:', uuid);
+
+    setScanned(false)
+    setCameraOn(true);
+    console.log('ready to scan again  ');
   };
 
   return (
