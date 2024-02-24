@@ -1,4 +1,4 @@
-import { StyleSheet, Text, TouchableOpacity, View, Alert, ActivityIndicator } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View, Alert, ActivityIndicator, ScrollView, ToastAndroid } from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
 
 import { StatusBar } from 'expo-status-bar';
@@ -32,15 +32,9 @@ export default function App() {
 
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener(state => {
-      console.log('Connection type', state.type);
-      console.log('Is connected?', state.isConnected);
-      console.log('Is internet reachable?', state.isInternetReachable);
-
+      
       if ( state.isInternetReachable === false ) {
-        Alert.alert(
-          'Network Error',
-          'Bad Connectivity'
-          )
+        ToastAndroid.showWithGravity('Bad Connectivity', ToastAndroid.SHORT, ToastAndroid.BOTTOM);
         Alert.prompt(
           'Network Error',
           'Bad Connectivity'
@@ -48,10 +42,7 @@ export default function App() {
       }
 
       if (state.isConnected === false) {
-        Alert.alert(
-          'Network Error',
-          'No internet connection'
-          )
+        ToastAndroid.showWithGravity('No internet connection', ToastAndroid.SHORT, ToastAndroid.BOTTOM);
         Alert.prompt(
           'Network Error',
           'No internet connection'
@@ -103,6 +94,11 @@ export default function App() {
         `Team of UUID :${data} has been scanned!`,
         [
           {
+            text: 'Give Attendance',
+            onPress: () => giveAttendance(data),
+            style: 'default',
+          },
+          {
             text: 'Cancel',
             onPress: () => handleCancel(),
             style: 'cancel',
@@ -111,7 +107,7 @@ export default function App() {
         
       );
     } else {
-      Alert.alert(`invalid qr`);
+      ToastAndroid.showWithGravity('invalid qr', ToastAndroid.SHORT, ToastAndroid.BOTTOM);
       Alert.prompt(`invalid qr`);
 
       setTimeout(() => {
@@ -127,103 +123,108 @@ export default function App() {
   const handleCancel = () => {
     setScanned(false)
     setCameraOn(true);
-    Alert.alert('Attendance not given', 'Scan again');
+    ToastAndroid.showWithGravity('Attendance not given', ToastAndroid.SHORT, ToastAndroid.BOTTOM);
     Alert.prompt('Attendance not given', 'Scan again');
-    console.log('ready to scan again  ');
   }
 
   const giveAttendance = (uuid: string) => {
     setIsLoading(true);
     setTimeout(() => {
       console.log('Attendance given to team of UUID:', uuid);
-      Alert.alert('Attendance given to team of UUID:', uuid);
+      ToastAndroid.showWithGravity(`Attendance given to team of UUID: ${uuid}`, ToastAndroid.LONG, ToastAndroid.BOTTOM);
       Alert.prompt('Attendance given to team of UUID:', uuid);
       setIsLoading(false);
       setScanned(false)
       setCameraOn(true);
-      console.log('ready to scan again  ');
     }, 3000);
     
   };
 
   return (
-    <View style={styles.container}>
-
-      <Image 
-        source={FCLogo}
-        style={styles.logo}
-        contentFit="contain"
-      />
-
-      <View style={styles.cameraContainer}>
-        {cameraOn ? (
-          <CameraView 
-            style={styles.camera} 
-            barcodeScannerSettings={{
-              barcodeTypes: ["qr"],
-            }}
-            onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
-            enableTorch={isTorchon}
+    <ScrollView style={styles.scrollContainer} >
+      <View style={styles.container}>
+        <View style={{display:'flex', flexDirection:'row', width:'100%', height:'auto', gap:2, justifyContent:'space-around', alignItems:'center'}}>
+          <Image 
+            source={FCLogo}
+            style={styles.logo}
+            contentFit="contain"
           />
-
-        ) : (
-          <View style={styles.cameraOff}>
-            <Text style={styles.text}>Camera is off</Text>
-          </View>
-        )}
-      </View>
-
-      <View style={isLoading ?  styles.box : styles.hidden }>
-        {isLoading && <Text style={styles.text}>Marking Present for the Team...</Text>}
-        <ActivityIndicator animating={isLoading} size="large" color="#fff" />
-      </View>
-      
-      <View style={styles.buttonContainer}>  
-        <View style={{width:30, height:2, backgroundColor:'white' }}></View>
-        <View style={{width:'100%',height:'auto', display:'flex', flexDirection:'row', justifyContent:'center', alignItems:'center'}}>
-          <TouchableOpacity 
-            style={styles.button} 
-            onPress={() => setCameraOn(prev => !prev)}
-          >
-            <Image 
-              style={styles.icon} 
-              source={cameraOn ? Camera_Off : Camera_On}
-              contentFit="cover"
-            />
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.button, isTorchon && styles.torchon, !cameraOn && styles.buttonDisabled ]} disabled={!cameraOn} onPress={() => setIsTorchon(!isTorchon)}>
-            {isTorchon ? (
-                <Image
-                  style={styles.icon}
-                  source={Flash_Off}
-                  contentFit="cover"            
-                />
-              ) : (
-                <Image
-                  style={styles.icon}
-                  source={Flash_On}
-                  contentFit="cover"            
-              />
-            )}
-          </TouchableOpacity>
+          <Text style={[styles.text , ]}>TurnOut by FC</Text>
         </View>
-      </View>    
 
+        <View style={styles.cameraContainer}>
+          {cameraOn ? (
+            <CameraView 
+              style={styles.camera} 
+              barcodeScannerSettings={{
+                barcodeTypes: ["qr"],
+              }}
+              onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
+              enableTorch={isTorchon}
+            />
+
+          ) : (
+            <View style={styles.cameraOff}>
+              <Text style={styles.text}>Camera is off</Text>
+            </View>
+          )}
+        </View>
+
+        <View style={isLoading ?  styles.box : styles.hidden }>
+          {isLoading && <Text style={styles.text}>Marking Present for the Team...</Text>}
+          <ActivityIndicator animating={isLoading} size="large" color="#fff" />
+        </View>
+        
+        <View style={styles.buttonContainer}>  
+          <View style={{width:30, height:2, backgroundColor:'white' }}></View>
+          <View style={{width:'100%',height:'auto', display:'flex', flexDirection:'row', justifyContent:'center', alignItems:'center'}}>
+            <TouchableOpacity 
+              style={styles.button} 
+              onPress={() => setCameraOn(prev => !prev)}
+            >
+              <Image 
+                style={styles.icon} 
+                source={cameraOn ? Camera_Off : Camera_On}
+                contentFit="cover"
+              />
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.button, isTorchon && styles.torchon, !cameraOn && styles.buttonDisabled ]} disabled={!cameraOn} onPress={() => setIsTorchon(!isTorchon)}>
+              {isTorchon ? (
+                  <Image
+                    style={styles.icon}
+                    source={Flash_Off}
+                    contentFit="cover"            
+                  />
+                ) : (
+                  <Image
+                    style={styles.icon}
+                    source={Flash_On}
+                    contentFit="cover"            
+                />
+              )}
+            </TouchableOpacity>
+          </View>
+        </View>    
+      </View>
       <StatusBar style="dark" />
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
+  scrollContainer:{
+    backgroundColor: '#090909',
+    width: '100%',
+    height: 'auto',
+  },
   container: {
-    flex: 1,
     backgroundColor: '#090909',
     display: 'flex',
     flexDirection: 'column',
-    justifyContent: 'space-around',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    height: '80%',
     width: '100%',
+    height: '100%',
     gap: 5,
   },
   cameraContainer: {
@@ -269,11 +270,11 @@ const styles = StyleSheet.create({
     display: 'flex',
     flexDirection: 'column',
     width: '100%',
-    height: 50,
+    height: 'auto',
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 160,
-    marginBottom: 5,
+    padding: 10,
     borderWidth: 1,
     borderColor: 'gray',
     borderTopRightRadius: 8,
