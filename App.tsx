@@ -2,7 +2,7 @@ import { StyleSheet, Text, TouchableOpacity, View, Alert, ActivityIndicator, Scr
 import NetInfo from '@react-native-community/netinfo';
 
 import { StatusBar } from 'expo-status-bar';
-import { CameraType, CameraView, useCameraPermissions } from 'expo-camera/next';
+import { CameraView, useCameraPermissions } from 'expo-camera/next';
 import { Image } from 'expo-image';
 
 import { useEffect, useState } from 'react';
@@ -114,8 +114,7 @@ export default function App() {
       setTimeout(() => {
         setScanned(false)
         setCameraOn(true);
-        console.log('ready to scan again  ');
-
+        ToastAndroid.showWithGravity('Ready to scan again', ToastAndroid.SHORT, ToastAndroid.BOTTOM);
       }, 3000)
     }
     
@@ -144,7 +143,6 @@ export default function App() {
       else {
         const { attendance } = data;
         if (attendance === false ) {
-          console.log('attendance', attendance);
 
           const { error, status } = await supabase
             .from('eventsregistration')
@@ -155,13 +153,11 @@ export default function App() {
           }
         }
         else if (attendance === true) {
-          console.log('attendance', attendance);
           ToastAndroid.showWithGravity('Already Marked Present!!', ToastAndroid.LONG, ToastAndroid.BOTTOM);
           Alert.prompt('Already Marked Present');
         }
       }
     } catch (error) {
-      console.log('error', error)
       Alert.prompt('error', error)
       ToastAndroid.showWithGravity(`error: ${error}`, ToastAndroid.LONG, ToastAndroid.BOTTOM);
     } finally {
