@@ -150,21 +150,6 @@ export default function Scanner({
 }
 
 const styles = StyleSheet.create({
-    scrollContainer:{
-      backgroundColor: '#090909',
-      width: '100%',
-      height: 'auto',
-    },
-    container: {
-      backgroundColor: '#090909',
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      width: '100%',
-      height: '100%',
-      gap: 5,
-    },
     cameraContainer: {
       width: 300,
       height: 300,
@@ -202,58 +187,8 @@ const styles = StyleSheet.create({
       backgroundColor: 'rgba(25,25,20,0.5)',
       borderRadius: 10,
     },
-    buttonContainer: {
-      flex: 1,
-      backgroundColor: 'rgba(25,25,20,0.5)',
-      display: 'flex',
-      flexDirection: 'column',
-      width: '100%',
-      height: 'auto',
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginTop: 160,
-      padding: 10,
-      borderWidth: 1,
-      borderColor: 'gray',
-      borderTopRightRadius: 8,
-      borderTopLeftRadius: 8,
-    },
-    torchon :{
-      backgroundColor: 'rgb(216,62,62)',
-    },
-    button: {
-      width: 'auto',
-      alignSelf: 'flex-end',
-      alignItems: 'center',
-      margin: 20,
-      padding: 8,
-      backgroundColor: '#f0f0f0',
-      borderWidth: 1,
-      borderRadius: 8,
-      borderColor: 'gray',
-    },
-    buttonDisabled: {
-      backgroundColor: 'gray',
-    },
     text: {
       fontSize: 18,
       color: 'white',
     },
-    icon: {
-      width: 30,
-      height: 30,
-      color: 'white',
-    },
-    logo:{
-      width: 130,
-      height: 130,
-      resizeMode: 'contain',
-      margin:0,
-    },
-    appLogo:{
-      width: 70,
-      height: 70,
-      resizeMode: 'contain',
-      margin:0,
-    }
   });

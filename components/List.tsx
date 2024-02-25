@@ -111,16 +111,6 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'column',
     },
-    container: {
-      backgroundColor: '#090909',
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      width: '100%',
-      height: '40%',
-      gap: 5,
-    },
     table: {
         borderWidth: 1,
         borderColor: '#fff',
@@ -138,29 +128,6 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: '#fff',
         color: '#fff',
-    },
-    cameraContainer: {
-      width: 300,
-      height: 300,
-      borderWidth: 1,
-      borderColor: 'white',
-      overflow: 'hidden',
-      borderRadius: 10,
-      margin: 30,
-    },
-    camera: {
-      width: '100%',
-      height: '100%',
-      justifyContent: 'flex-end',
-      alignItems: 'center',
-    },
-    cameraOff: {
-      width: '100%',
-      height: '100%',
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: '#151718',
-  
     },
     hidden: {
       display: 'none',
@@ -200,16 +167,4 @@ const styles = StyleSheet.create({
       height: 30,
       color: 'white',
     },
-    logo:{
-      width: 130,
-      height: 130,
-      resizeMode: 'contain',
-      margin:0,
-    },
-    appLogo:{
-      width: 70,
-      height: 70,
-      resizeMode: 'contain',
-      margin:0,
-    }
   });
