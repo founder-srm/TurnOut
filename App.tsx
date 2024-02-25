@@ -1,12 +1,14 @@
-import { StyleSheet, Text, TouchableOpacity, View, Alert, ActivityIndicator, ScrollView, ToastAndroid } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View, Alert, ActivityIndicator, ScrollView, ToastAndroid, RefreshControl } from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
 
 import { StatusBar } from 'expo-status-bar';
-import { CameraView, useCameraPermissions } from 'expo-camera/next';
+import { useCameraPermissions } from 'expo-camera/next';
 import { Image } from 'expo-image';
 
-import { useEffect, useState } from 'react';
-import { supabase } from './lib/supabase';
+import { useCallback, useEffect, useState } from 'react';
+
+import Scanner from './components/Scanner';
+import List from './components/List';
 
 const Flash_Off = require('./assets/flash_off.svg');
 const Flash_On = require('./assets/flash_on.svg');
@@ -14,6 +16,8 @@ const Camera_Off = require('./assets/camera_off.svg');
 const Camera_On = require('./assets/camera_on.svg');
 const FCLogo = require('./assets/fc_logo.png');
 const AppLogo = require('./assets/turnout.png');
+const ListLogo = require('./assets/list_icon.svg');
+const ScannerLogo = require('./assets/scan_icon.svg');
 
 export default function App() {
 
@@ -21,7 +25,7 @@ export default function App() {
   const [scanned, setScanned] = useState(false);
   const [isTorchon, setIsTorchon] = useState(false)
   const [cameraOn, setCameraOn] = useState(true);
-  const [isLoading, setIsLoading] = useState(false);
+  const [pageState, setPageState] = useState(true);
 
   useEffect(() => {
     (async () => {
@@ -62,115 +66,13 @@ export default function App() {
     return <Text>No access to camera</Text>;
   }
 
-  function isUUID(value: string): boolean {
-    const uuidRegex = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/;
-    return uuidRegex.test(value);
-  }
-
-  const handleBarCodeScanned = ({ type, data }) => {
-    setScanned(true);
-    setCameraOn(false);
-    if (isUUID(data)) {
-
-      Alert.alert(
-        'Successful Scan!',
-        `Team of UUID :${data} has been scanned!`,
-        [
-          {
-            text: 'Give Attendance',
-            onPress: () => giveAttendance(data),
-            style: 'default',
-          },
-          {
-            text: 'Cancel',
-            onPress: () => handleCancel(),
-            style: 'cancel',
-          },
-        ],
-        
-      );
-      
-      Alert.prompt(
-        'Successful Scan!',
-        `Team of UUID :${data} has been scanned!`,
-        [
-          {
-            text: 'Give Attendance',
-            onPress: () => giveAttendance(data),
-            style: 'default',
-          },
-          {
-            text: 'Cancel',
-            onPress: () => handleCancel(),
-            style: 'cancel',
-          },
-        ],
-        
-      );
-    } else {
-      ToastAndroid.showWithGravity('invalid qr', ToastAndroid.SHORT, ToastAndroid.BOTTOM);
-      Alert.prompt(`invalid qr`);
-
-      setTimeout(() => {
-        setScanned(false)
-        setCameraOn(true);
-        ToastAndroid.showWithGravity('Ready to scan again', ToastAndroid.SHORT, ToastAndroid.BOTTOM);
-      }, 3000)
-    }
-    
-  };
-
-  const handleCancel = () => {
-    setScanned(false)
-    setCameraOn(true);
-    ToastAndroid.showWithGravity('Attendance not given', ToastAndroid.SHORT, ToastAndroid.BOTTOM);
-    Alert.prompt('Attendance not given', 'Scan again');
-  }
-
   
-  const giveAttendance = async(uuid: string) => {
-    setIsLoading(true);
-    try{
-      const { data, error, status } = await supabase
-        .from('eventsregistration')
-        .select(`attendance`)
-        .eq('qr_id', uuid)
-        .single()
-      if (error && status !== 406) {
-        throw error
-      }
 
-      else {
-        const { attendance } = data;
-        if (attendance === false ) {
-
-          const { error, status } = await supabase
-            .from('eventsregistration')
-            .update({ attendance: true })
-            .eq('qr_id', uuid)
-          if (error && status !== 406) {
-            alert( error)
-          }
-        }
-        else if (attendance === true) {
-          ToastAndroid.showWithGravity('Already Marked Present!!', ToastAndroid.LONG, ToastAndroid.BOTTOM);
-          Alert.prompt('Already Marked Present');
-        }
-      }
-    } catch (error) {
-      Alert.prompt('error', error)
-      ToastAndroid.showWithGravity(`error: ${error}`, ToastAndroid.LONG, ToastAndroid.BOTTOM);
-    } finally {
-      setIsLoading(false);
-      setScanned(false)
-      setCameraOn(true);
-    }
-  };
-
+ 
 
 
   return (
-    <ScrollView style={styles.scrollContainer} >
+    <ScrollView style={styles.scrollContainer}>
       <View style={styles.container}>
         <View style={{display:'flex', flexDirection:'row', width:'100%', height:'auto', gap:2, justifyContent:'space-around', alignItems:'center'}}>
           <Image 
@@ -185,44 +87,36 @@ export default function App() {
           />
           <Text style={[styles.text , ]}>TurnOut by FC</Text>
         </View>
-
-        <View style={styles.cameraContainer}>
-          {cameraOn ? (
-            <CameraView 
-              style={styles.camera} 
-              barcodeScannerSettings={{
-                barcodeTypes: ["qr"],
-              }}
-              onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
-              enableTorch={isTorchon}
+        {
+          pageState ? (            
+            <Scanner 
+              scanned={scanned}
+              cameraOn={cameraOn}
+              setCameraOn={setCameraOn}
+              setScanned={setScanned}
+              isTorchon={isTorchon}
+              setTorchon={setIsTorchon}
             />
-
           ) : (
-            <View style={styles.cameraOff}>
-              <Text style={styles.text}>Camera is off</Text>
-            </View>
-          )}
-        </View>
-
-        <View style={isLoading ?  styles.box : styles.hidden }>
-          {isLoading && <Text style={styles.text}>Marking Present for the Team...</Text>}
-          <ActivityIndicator animating={isLoading} size="large" color="#fff" />
-        </View>
+            <List />
+          )
+        }
         
         <View style={styles.buttonContainer}>  
           <View style={{width:30, height:2, backgroundColor:'white' }}></View>
           <View style={{width:'100%',height:'auto', display:'flex', flexDirection:'row', justifyContent:'center', alignItems:'center'}}>
             <TouchableOpacity 
-              style={styles.button} 
+              style={[styles.button, !pageState && styles.buttonDisabled]} 
               onPress={() => setCameraOn(prev => !prev)}
+              disabled={!pageState}
             >
               <Image 
                 style={styles.icon} 
                 source={cameraOn ? Camera_Off : Camera_On}
                 contentFit="cover"
               />
-            </TouchableOpacity>
-            <TouchableOpacity style={[styles.button, isTorchon && styles.torchon, !cameraOn && styles.buttonDisabled ]} disabled={!cameraOn} onPress={() => setIsTorchon(!isTorchon)}>
+            </TouchableOpacity>            
+            <TouchableOpacity style={[styles.button, isTorchon && styles.torchon, !cameraOn && styles.buttonDisabled ]} disabled={!cameraOn || !pageState} onPress={() => setIsTorchon(!isTorchon)}>
               {isTorchon ? (
                   <Image
                     style={styles.icon}
@@ -236,6 +130,16 @@ export default function App() {
                     contentFit="cover"            
                 />
               )}
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.button} 
+              onPress={() => setPageState(prev => !prev)}
+            >
+              <Image 
+                style={styles.icon} 
+                source={pageState ? ListLogo : ScannerLogo}
+                contentFit="cover"
+              />
             </TouchableOpacity>
           </View>
         </View>    
@@ -307,12 +211,13 @@ const styles = StyleSheet.create({
     height: 'auto',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 160,
+    marginTop: 170,
     padding: 10,
     borderWidth: 1,
     borderColor: 'gray',
     borderTopRightRadius: 8,
     borderTopLeftRadius: 8,
+    zIndex: 10,
   },
   torchon :{
     backgroundColor: 'rgb(216,62,62)',
