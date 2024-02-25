@@ -13,6 +13,7 @@ const Flash_On = require('./assets/flash_on.svg');
 const Camera_Off = require('./assets/camera_off.svg');
 const Camera_On = require('./assets/camera_on.svg');
 const FCLogo = require('./assets/fc_logo.png');
+const AppLogo = require('./assets/turnout.png');
 
 export default function App() {
 
@@ -177,6 +178,11 @@ export default function App() {
             style={styles.logo}
             contentFit="contain"
           />
+          <Image 
+            source={AppLogo}
+            style={styles.appLogo}
+            contentFit="contain"
+          />
           <Text style={[styles.text , ]}>TurnOut by FC</Text>
         </View>
 
@@ -337,6 +343,12 @@ const styles = StyleSheet.create({
   logo:{
     width: 130,
     height: 130,
+    resizeMode: 'contain',
+    margin:0,
+  },
+  appLogo:{
+    width: 70,
+    height: 70,
     resizeMode: 'contain',
     margin:0,
   }
