@@ -18,13 +18,19 @@
       "supportsTablet": true,
       "entitlements": {
         "com.apple.developer.networking.wifi-info": true
-      }
+      },
+      "bundleIdentifier": "com.greenarcade.turnout"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/turnout_mini.png",
         "backgroundColor": "#151718"
-      }
+      },
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ],
+      "package": "com.greenarcade.turnout"
     },
     "web": {
       "favicon": "./assets/turnout.png"
@@ -36,6 +42,12 @@
           "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera."
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "6651e413-f6a0-4536-a878-a1310c20ce23"
+      }
+    },
+    "owner": "greenarcade"
   }
 }
