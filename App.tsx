@@ -1,11 +1,9 @@
-import { StyleSheet, Text, TouchableOpacity, View, Alert, ScrollView, ToastAndroid } from 'react-native';
-import NetInfo from '@react-native-community/netinfo';
+import { StyleSheet, Text, TouchableOpacity, View, ScrollView } from 'react-native';
 
 import { StatusBar } from 'expo-status-bar';
 import { useCameraPermissions } from 'expo-camera';
 import { Image } from 'expo-image';
 
-import { PaperProvider } from 'react-native-paper';
 import {  useEffect, useState } from 'react';
 
 import Scanner from './components/Scanner';
@@ -36,114 +34,85 @@ export default function App() {
     })();
   }, []);
 
-  useEffect(() => {
-    const unsubscribe = NetInfo.addEventListener(state => {
-      
-      if ( state.isInternetReachable === false ) {
-        ToastAndroid.showWithGravity('Bad Connectivity', ToastAndroid.SHORT, ToastAndroid.BOTTOM);
-        Alert.prompt(
-          'Network Error',
-          'Bad Connectivity'
-          )
-      }
-
-      if (state.isConnected === false) {
-        ToastAndroid.showWithGravity('No internet connection', ToastAndroid.SHORT, ToastAndroid.BOTTOM);
-        Alert.prompt(
-          'Network Error',
-          'No internet connection'
-          )
-      }
-
-    });
-    
-
-    return () => {
-      unsubscribe();
-    };
-  }, []);
-
   if (!permission) {
     return <Text>No access to camera</Text>;
   }
 
   return (
-    <PaperProvider>
-      <ScrollView style={styles.scrollContainer}>
-        <View style={styles.container}>
-          <View style={{display:'flex', flexDirection:'row', width:'100%', height:'auto', gap:2, justifyContent:'space-around', alignItems:'center'}}>
-            <Image 
-              source={FCLogo}
-              style={styles.logo}
-              contentFit="contain"
-            />
-            <Image 
-              source={AppLogo}
-              style={styles.appLogo}
-              contentFit="contain"
-            />
-            <Text style={[styles.text]}>TurnOut by FC</Text>
-          </View>
-          {
-            pageState ? (            
-              <Scanner 
-                scanned={scanned}
-                cameraOn={cameraOn}
-                setCameraOn={setCameraOn}
-                setScanned={setScanned}
-                isTorchOn={isTorchon}
-                setTorchOn={setIsTorchon}
-              />
-            ) : (
-              <List />
-            )
-          }
-          
-          <View style={styles.buttonContainer}>  
-            <View style={{width:30, height:2, backgroundColor:'white' }}></View>
-            <View style={{width:'100%',height:'auto', display:'flex', flexDirection:'row', justifyContent:'center', alignItems:'center'}}>
-              <TouchableOpacity 
-                style={[styles.button, !pageState && styles.buttonDisabled]} 
-                onPress={() => setCameraOn(prev => !prev)}
-                disabled={!pageState}
-              >
-                <Image 
-                  style={styles.icon} 
-                  source={cameraOn ? Camera_Off : Camera_On}
-                  contentFit="cover"
-                />
-              </TouchableOpacity>            
-              <TouchableOpacity style={[styles.button, isTorchon && styles.torchon, !cameraOn && styles.buttonDisabled ]} disabled={!cameraOn || !pageState} onPress={() => setIsTorchon(!isTorchon)}>
-                {isTorchon ? (
-                    <Image
-                      style={styles.icon}
-                      source={Flash_Off}
-                      contentFit="cover"            
-                    />
-                  ) : (
-                    <Image
-                      style={styles.icon}
-                      source={Flash_On}
-                      contentFit="cover"            
-                  />
-                )}
-              </TouchableOpacity>
-              <TouchableOpacity 
-                style={styles.button} 
-                onPress={() => setPageState(prev => !prev)}
-              >
-                <Image 
-                  style={styles.icon} 
-                  source={pageState ? ListLogo : ScannerLogo}
-                  contentFit="cover"
-                />
-              </TouchableOpacity>
-            </View>
-          </View>    
+    <ScrollView style={styles.scrollContainer}>
+      <View style={styles.container}>
+        <View style={{display:'flex', flexDirection:'row', width:'100%', height:'auto', gap:2, justifyContent:'space-around', alignItems:'center'}}>
+          <Image 
+            source={FCLogo}
+            style={styles.logo}
+            contentFit="contain"
+          />
+          <Image 
+            source={AppLogo}
+            style={styles.appLogo}
+            contentFit="contain"
+          />
+          <Text style={[styles.text]}>TurnOut by FC</Text>
         </View>
-        <StatusBar style="dark" />
-      </ScrollView>
-    </PaperProvider>
+        {
+          pageState ? (            
+            <Scanner 
+              scanned={scanned}
+              cameraOn={cameraOn}
+              setCameraOn={setCameraOn}
+              setScanned={setScanned}
+              isTorchOn={isTorchon}
+              setTorchOn={setIsTorchon}
+            />
+          ) : (
+            <List />
+          )
+        }
+        
+        <View style={styles.buttonContainer}>  
+          <View style={{width:30, height:2, backgroundColor:'white' }}></View>
+          <View style={{width:'100%',height:'auto', display:'flex', flexDirection:'row', justifyContent:'center', alignItems:'center'}}>
+            <TouchableOpacity 
+              style={[styles.button, !pageState && styles.buttonDisabled]} 
+              onPress={() => setCameraOn(prev => !prev)}
+              disabled={!pageState}
+            >
+              <Image 
+                style={styles.icon} 
+                source={cameraOn ? Camera_Off : Camera_On}
+                contentFit="cover"
+              />
+            </TouchableOpacity>            
+            <TouchableOpacity style={[styles.button, isTorchon && styles.torchon, !cameraOn && styles.buttonDisabled ]} disabled={!cameraOn || !pageState} onPress={() => setIsTorchon(!isTorchon)}>
+              {isTorchon ? (
+                  <Image
+                    style={styles.icon}
+                    source={Flash_Off}
+                    contentFit="cover"            
+                  />
+                ) : (
+                  <Image
+                    style={styles.icon}
+                    source={Flash_On}
+                    contentFit="cover"            
+                />
+              )}
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.button} 
+              onPress={() => setPageState(prev => !prev)}
+            >
+              <Image 
+                style={styles.icon} 
+                source={pageState ? ListLogo : ScannerLogo}
+                contentFit="cover"
+              />
+            </TouchableOpacity>
+          </View>
+        </View>    
+      </View>
+      <StatusBar style="dark" />
+    </ScrollView>
   );
 }
 

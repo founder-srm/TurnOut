@@ -1,4 +1,4 @@
-import React, { useState, useCallback, DO_NOT_USE_OR_YOU_WILL_BE_FIRED_CALLBACK_REF_RETURN_VALUES } from "react";
+import React, { useState, useCallback } from "react";
 import { ActivityIndicator, Alert, StyleSheet, Text, ToastAndroid, View, TouchableOpacity } from "react-native";
 import { supabase } from "../lib/supabase";
 import { CameraView } from "expo-camera";
