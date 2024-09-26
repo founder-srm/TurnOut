@@ -67,11 +67,6 @@ export default function App() {
     return <Text>No access to camera</Text>;
   }
 
-  
-
- 
-
-
   return (
     <PaperProvider>
       <ScrollView style={styles.scrollContainer}>
@@ -87,7 +82,7 @@ export default function App() {
               style={styles.appLogo}
               contentFit="contain"
             />
-            <Text style={[styles.text , ]}>TurnOut by FC</Text>
+            <Text style={[styles.text]}>TurnOut by FC</Text>
           </View>
           {
             pageState ? (            
