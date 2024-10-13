@@ -10,7 +10,7 @@ SplashScreen.preventAutoHideAsync();
 
 export const unstable_settings = {
   // Ensure that reloading on `/modal` keeps a back button present.
-  initialRouteName: '(drawer)',
+  initialRouteName: '(tabs)',
 };
 
 export default function RootLayout() {
@@ -30,9 +30,9 @@ export default function RootLayout() {
   return (
     <TamaguiProvider config={config}>
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <Stack>
-          <Stack.Screen name="(drawer)" options={{ headerShown: false }} />
-          <Stack.Screen name="modal" options={{ title: 'Modal', presentation: 'modal' }} />
+        <Stack screenOptions={{headerShown:false}}>
+        <Stack.Screen name="index" options={{ title: 'Home' }} />
+        <Stack.Screen name="(tabs)" options={{ title: 'Tabs' }} />
         </Stack>
       </GestureHandlerRootView>
     </TamaguiProvider>
