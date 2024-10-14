@@ -105,13 +105,13 @@ export default function Home() {
             style={[
               animatedOrangeStyles, // Apply animated height styles
               {
-                backgroundColor: 'orange',
+                backgroundColor: '#FDB623',
                 justifyContent: 'flex-start',
                 alignItems: 'center',
                 borderTopLeftRadius: 50,
                 borderTopRightRadius: 50,
                 shadowColor: '#000',
-                shadowOffset: { width: 10, height: -4 },
+                shadowOffset: { width: 0, height: 4 },
                 shadowOpacity: 0.7,
                 shadowRadius: 10,
                 elevation: 10,
