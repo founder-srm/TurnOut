@@ -18,13 +18,13 @@ const AnimatedIcon: React.FC<AnimatedIconProps> = ({ focused, color, IconCompone
       animatedValue.setValue(0); // Reset the value
       Animated.timing(animatedValue, {
         toValue: 1,
-        duration: 600,
+        duration: 1000,
         useNativeDriver: false,
       }).start();
     } else {
       Animated.timing(animatedValue, {
         toValue: 0,
-        duration: 600,
+        duration: 1000,
         useNativeDriver: false,
       }).start();
     }

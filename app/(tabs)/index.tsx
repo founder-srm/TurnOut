@@ -31,7 +31,7 @@ export default function Home() {
     }
   };
 
-  const scanQRCodeFromImage = async (uri) => {
+  const scanQRCodeFromImage = async (uri:any) => {
     const response = await fetch(uri);
     const blob = await response.blob();
     const img = new Image();
@@ -186,11 +186,12 @@ export default function Home() {
       </View>
 
       <XStack
-        position="absolute"
+        position="relative"
         display="flex"
         gap={10}
         justifyContent="space-between"
         padding="$3"
+        right='$3'
         marginTop="$7">
         <TamaguiButton
           size="$5"

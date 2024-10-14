@@ -2,15 +2,17 @@ import React, { useState, useCallback } from 'react';
 import { YStack, XStack, Button, Text, AnimatePresence } from 'tamagui';
 import { useFocusEffect } from '@react-navigation/native'; // Hook to detect tab switch
 import { History, Settings, Code, ScanQrCode } from 'lucide-react-native'; // lucide-react-native for icons
+import { useRouter } from 'expo-router';
 
 const options = [
-  { name: 'History', icon: History },
-  { name: 'Settings', icon: Settings },
-  { name: 'Developers', icon: Code },
+  { name: 'History', icon: History, route: '/history' },
+  { name: 'Settings', icon: Settings, route:' /settings' },
+  { name: 'Developers', icon: Code, route: '/developers' },
 ];
 
 export default function QRGeneratorScreen() {
   const [isVisible, setIsVisible] = useState(false); // Start as hidden
+  const router = useRouter();
 
   // Trigger animation when the screen is focused (tab switch)
   useFocusEffect(
@@ -20,6 +22,9 @@ export default function QRGeneratorScreen() {
       setTimeout(() => setIsVisible(true), 100); // Slight delay to trigger re-animation
     }, [])
   );
+  const handleNavigation = (route:string) => {
+    router.push(route); 
+  };
 
   return (
     <YStack f={1} bg="#333" ai="center">
@@ -34,7 +39,7 @@ export default function QRGeneratorScreen() {
       {/* Options Grid with Bounce Animation */}
       <YStack flexGrow={1} ai="center" mt='$10' gap="$4" maxWidth={400} w="100%" p={16}>
         <AnimatePresence>
-          {isVisible && options.map(({ name, icon: Icon }, index) => (
+          {isVisible && options.map(({ name, icon: Icon,route }, index) => (
             <YStack
               key={name}
               enterStyle={{
@@ -67,7 +72,7 @@ export default function QRGeneratorScreen() {
                   shadowOpacity: 0.4,
                   shadowRadius: 8,
                 }} // Hover effect for button
-                onPress={() => console.log(`${name} pressed`)}
+                onPress={() => handleNavigation(route)}
               >
                 <XStack ai="center" jc="space-between" px="$4" w="100%">
                   <Text color="#FDB623" fontSize="$5" ta="center">
