@@ -18,6 +18,7 @@
     "@react-navigation/native": "^6.1.18",
     "@react-navigation/stack": "^6.4.1",
     "@supabase/supabase-js": "^2.38.4",
+    "@tamagui/card": "^1.115.3",
     "@tamagui/font-inter": "1.74.8",
     "@tamagui/react-native-media-driver": "1.74.8",
     "@tamagui/shorthands": "1.74.8",

@@ -1,13 +1,14 @@
 import React, { useState, useCallback } from 'react';
 import { YStack, XStack, Button, Text, AnimatePresence } from 'tamagui';
 import { useFocusEffect } from '@react-navigation/native'; // Hook to detect tab switch
-import { History, Settings, Code, ScanQrCode } from 'lucide-react-native'; // lucide-react-native for icons
+import { History, Settings, Code, ScanQrCode, User } from 'lucide-react-native'; // lucide-react-native for icons
 import { useRouter } from 'expo-router';
 
 const options = [
   { name: 'History', icon: History, route: '/history' },
-  { name: 'Settings', icon: Settings, route:' /settings' },
-  { name: 'Developers', icon: Code, route: '/developers' },
+  { name: 'Attendance', icon: User, route: '/attendance' },
+  { name: 'Settings', icon: Settings, route:' /options' },
+  { name: 'Developers', icon: Code, route: '/developer' },
 ];
 
 export default function QRGeneratorScreen() {
@@ -18,7 +19,7 @@ export default function QRGeneratorScreen() {
   useFocusEffect(
     useCallback(() => {
       // Reset animation before showing to ensure re-animation on tab switch
-      setIsVisible(false);
+      // setIsVisible(false);
       setTimeout(() => setIsVisible(true), 100); // Slight delay to trigger re-animation
     }, [])
   );
