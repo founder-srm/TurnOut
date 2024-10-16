@@ -7,8 +7,8 @@ import scanImg from '../../assets/qr-code-scan.png';
 import flipImg from '../../assets/flip.png';
 import flashImg from '../../assets/flash.png';
 import imgImg from '../../assets/image.png';
-import closeImg from '../../assets/close.png'; // Add a close icon
-import jsQR from 'jsqr'; // Import jsQR to decode the QR code
+import closeImg from '../../assets/close.png'; 
+import jsQR from 'jsqr'; 
 
 export default function Home() {
   const [facing, setFacing] = useState('back');
@@ -42,9 +42,9 @@ export default function Home() {
       canvas.width = img.width;
       canvas.height = img.height;
       const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0);
+      ctx?.drawImage(img, 0, 0);
 
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const imageData = ctx?.getImageData(0, 0, canvas.width, canvas.height);
       const qrCode = jsQR(imageData.data, canvas.width, canvas.height);
 
       if (qrCode) {
@@ -68,7 +68,7 @@ export default function Home() {
     );
   }
 
-  const handleBarCodeScanned = ({ type, data }) => {
+  const handleBarCodeScanned = ({ type, data }:any) => {
     setScanned(true); // Stop further scanning until reset
     alert(`Bar code with type ${type} and data ${data} has been scanned!`);
   };
