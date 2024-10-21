@@ -2,7 +2,7 @@
   "expo": {
     "name": "turnout-app",
     "slug": "turnout-app",
-    "version": "1.0.0",
+    "version": "1.3.0",
 
     "scheme": "turnout-app",
     "web": {
