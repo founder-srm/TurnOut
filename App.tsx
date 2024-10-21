@@ -1,4 +1,4 @@
-import { StyleSheet, Text, TouchableOpacity, View, ScrollView } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View, ScrollView, ToastAndroid } from 'react-native';
 
 import { StatusBar } from 'expo-status-bar';
 import { useCameraPermissions } from 'expo-camera';
@@ -8,23 +8,27 @@ import {  useEffect, useState } from 'react';
 
 import Scanner from './components/Scanner';
 import List from './components/List';
+import Settings from './components/Settings';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const Flash_Off = require('./assets/flash_off.svg');
-const Flash_On = require('./assets/flash_on.svg');
+// const Flash_Off = require('./assets/flash_off.svg');
+// const Flash_On = require('./assets/flash_on.svg');
+const Return = require('./assets/return_logo.svg');
+const Info = require('./assets/info_logo.svg');
 const Camera_Off = require('./assets/camera_off.svg');
 const Camera_On = require('./assets/camera_on.svg');
 const FCLogo = require('./assets/fc_logo.png');
 const AppLogo = require('./assets/turnout.png');
 const ListLogo = require('./assets/list_icon.svg');
 const ScannerLogo = require('./assets/scan_icon.svg');
+const SettingsLogo = require('./assets/settings_logo.svg');
 
 export default function App() {
-
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
-  const [isTorchon, setIsTorchon] = useState(false)
+  const [isTorchon, setIsTorchon] = useState(false);
   const [cameraOn, setCameraOn] = useState(true);
-  const [pageState, setPageState] = useState(true);
+  const [pageState, setPageState] = useState('scanner'); // Changed to string for multiple states
 
   useEffect(() => {
     (async () => {
@@ -37,6 +41,46 @@ export default function App() {
   if (!permission) {
     return <Text>No access to camera</Text>;
   }
+
+  const getCurrentConfig = async () => {
+    try {
+      const config = await AsyncStorage.getItem('currentScanConfig');
+      // return config; 
+      ToastAndroid.show('Current Config for date: ' + config, ToastAndroid.SHORT);
+    } catch (error) {
+      console.error('Error loading config:', error);
+      return null;
+    }
+  };
+
+  const renderCurrentPage = () => {
+    switch (pageState) {
+      case 'scanner':
+        return (
+          <Scanner 
+            scanned={scanned}
+            cameraOn={cameraOn}
+            setCameraOn={setCameraOn}
+            setScanned={setScanned}
+            isTorchOn={isTorchon}
+            setTorchOn={setIsTorchon}
+          />
+        );
+      case 'list':
+        return <List />;
+      case 'settings':
+        return <Settings />;
+      default:
+        return <Scanner
+                  scanned={scanned}
+                  cameraOn={cameraOn}
+                  setCameraOn={setCameraOn}
+                  setScanned={setScanned}
+                  isTorchOn={isTorchon}
+                  setTorchOn={setIsTorchon}
+                />;
+    }
+  };
 
   return (
     <ScrollView style={styles.scrollContainer}>
@@ -54,28 +98,16 @@ export default function App() {
           />
           <Text style={[styles.text]}>TurnOut by FC</Text>
         </View>
-        {
-          pageState ? (            
-            <Scanner 
-              scanned={scanned}
-              cameraOn={cameraOn}
-              setCameraOn={setCameraOn}
-              setScanned={setScanned}
-              isTorchOn={isTorchon}
-              setTorchOn={setIsTorchon}
-            />
-          ) : (
-            <List />
-          )
-        }
+        
+        {renderCurrentPage()}
         
         <View style={styles.buttonContainer}>  
           <View style={{width:30, height:2, backgroundColor:'white' }}></View>
           <View style={{width:'100%',height:'auto', display:'flex', flexDirection:'row', justifyContent:'center', alignItems:'center'}}>
             <TouchableOpacity 
-              style={[styles.button, !pageState && styles.buttonDisabled]} 
+              style={[styles.button, pageState !== 'scanner' && styles.buttonDisabled]} 
               onPress={() => setCameraOn(prev => !prev)}
-              disabled={!pageState}
+              disabled={pageState !== 'scanner'}
             >
               <Image 
                 style={styles.icon} 
@@ -83,28 +115,38 @@ export default function App() {
                 contentFit="cover"
               />
             </TouchableOpacity>            
-            <TouchableOpacity style={[styles.button, isTorchon && styles.torchon, !cameraOn && styles.buttonDisabled ]} disabled={!cameraOn || !pageState} onPress={() => setIsTorchon(!isTorchon)}>
-              {isTorchon ? (
-                  <Image
-                    style={styles.icon}
-                    source={Flash_Off}
-                    contentFit="cover"            
-                  />
-                ) : (
-                  <Image
-                    style={styles.icon}
-                    source={Flash_On}
-                    contentFit="cover"            
-                />
-              )}
+            <TouchableOpacity 
+              style={[
+                styles.button, 
+                isTorchon && styles.torchon, 
+                // (!cameraOn || pageState !== 'scanner') && styles.buttonDisabled
+              ]} 
+              // disabled={!cameraOn || pageState !== 'scanner'} 
+              onPress={() => getCurrentConfig()}
+            >
+              <Image
+                style={styles.icon}
+                source={Info}
+                contentFit="cover"            
+              />
             </TouchableOpacity>
             <TouchableOpacity 
-              style={styles.button} 
-              onPress={() => setPageState(prev => !prev)}
+              style={[styles.button, pageState === 'list' && styles.activeButton]} 
+              onPress={() => setPageState(pageState === 'list' ? 'scanner' : 'list')}
             >
               <Image 
                 style={styles.icon} 
-                source={pageState ? ListLogo : ScannerLogo}
+                source={pageState === 'list' ? Return : ListLogo}
+                contentFit="cover"
+              />
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={[styles.button, pageState === 'settings' && styles.activeButton]} 
+              onPress={() => setPageState(pageState === 'settings' ? 'scanner' : 'settings')}
+            >
+              <Image 
+                style={styles.icon} 
+                source={pageState === 'settings' ? Return : SettingsLogo}
                 contentFit="cover"
               />
             </TouchableOpacity>
@@ -169,6 +211,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(25,25,20,0.5)',
     borderRadius: 10,
   },
+  activeButton: {
+    backgroundColor: '#3498db', // or any color you prefer for active state
+  },
   buttonContainer: {
     flex: 1,
     backgroundColor: 'rgba(25,25,20,0.5)',
@@ -178,7 +223,7 @@ const styles = StyleSheet.create({
     height: 'auto',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 170,
+    marginTop: 100,
     padding: 10,
     borderWidth: 1,
     borderColor: 'gray',
