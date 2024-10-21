@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const STEPS = {
@@ -23,55 +23,109 @@ export default function Settings() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [storedValue, setStoredValue] = useState('');
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     loadStoredSettings();
   }, []);
 
+  useEffect(() => {
+    console.log('Selections changed:', selections);
+  }, [selections]);
+
+  const handleBack = () => {
+    setError(null); // Clear errors when going back
+    setCurrentStep(prev => Math.max(0, prev - 1));
+  };
+
   const loadStoredSettings = async () => {
     try {
+      setError(null); // Clear any previous errors
       const currentValue = await AsyncStorage.getItem('currentScanConfig');
       if (currentValue) {
         setStoredValue(currentValue);
-        // Parse the stored value back into selections
+        // Safely parse the stored value with validation
         const daySession = currentValue.split('_');
-        const day = parseInt(daySession[0].replace('day', ''));
-        const session = daySession[1];
-        setSelections(prev => ({
-          ...prev,
-          day,
-          session
-        }));
+        if (daySession.length >= 2) {
+          const day = parseInt(daySession[0].replace('day', ''));
+          const session = daySession[1];
+          const gate = daySession[2] || null; // Handle gate if present
+          
+          // Validate values before setting
+          if (DAYS.includes(day) && SESSIONS.includes(session)) {
+            setSelections({
+              day,
+              session,
+              gate: GATES.includes(gate) ? gate : null
+            });
+            
+            // If we have complete valid data, show the summary
+            if (GATES.includes(gate)) {
+              setCurrentStep(STEPS.SUMMARY);
+            }
+          }
+        }
       }
     } catch (error) {
       console.error('Error loading settings:', error);
+      setError('Failed to load settings. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  const saveSettings = async () => {
+  const saveSettings = useCallback(async () => {
     try {
       setSaving(true);
-      const combinedValue = `day${selections.day}_${selections.session}_${selections.gate}`;
-      await AsyncStorage.setItem('currentScanConfig', combinedValue);
-      setStoredValue(combinedValue);
-      setCurrentStep(STEPS.SUMMARY);
+      setError(null);
+      
+      // Use a callback to get the most recent selections
+      setSelections(currentSelections => {
+        if (!currentSelections.day || !currentSelections.session || !currentSelections.gate) {
+          throw new Error('Please complete all selections before saving');
+        }
+
+        const combinedValue = `day${currentSelections.day}_${currentSelections.session}_${currentSelections.gate}`;
+        
+        // Use an IIFE to handle the async operation
+        (async () => {
+          try {
+            await AsyncStorage.setItem('currentScanConfig', combinedValue);
+            setStoredValue(combinedValue);
+            setCurrentStep(STEPS.SUMMARY);
+          } catch (error) {
+            console.error('Error saving to AsyncStorage:', error);
+            setError('Failed to save settings. Please try again.');
+          } finally {
+            setSaving(false);
+          }
+        })();
+
+        return currentSelections; // Return the current selections unchanged
+      });
     } catch (error) {
-      console.error('Error saving settings:', error);
-    } finally {
+      console.error('Error in saveSettings:', error);
+      setError(error.message || 'Failed to save settings. Please try again.');
+      setCurrentStep(STEPS.GATE);
       setSaving(false);
     }
-  };
+  }, []);
 
   const handleSelection = (key, value) => {
-    setSelections(prev => ({ ...prev, [key]: value }));
+    setError(null);
+    setSelections(prev => {
+      const newSelections = { ...prev, [key]: value };
+      console.log('New selections:', newSelections);
+      return newSelections;
+    });
     if (currentStep < STEPS.GATE) {
       setCurrentStep(prev => prev + 1);
     } else {
       saveSettings();
     }
   };
+
+  
 
   const renderDaySelection = () => (
     <View style={styles.stepContainer}>
@@ -177,19 +231,26 @@ export default function Settings() {
   }
 
   const renderCurrentStep = () => {
-    switch (currentStep) {
-      case STEPS.DAY:
-        return renderDaySelection();
-      case STEPS.SESSION:
-        return renderSessionSelection();
-      case STEPS.GATE:
-        return renderGateSelection();
-      case STEPS.SUMMARY:
-        return renderSummary();
-      default:
-        return null;
-    }
-  };
+  console.log('Current step:', currentStep, 'Current selections:', selections);
+  switch (currentStep) {
+    case STEPS.DAY:
+      return renderDaySelection();
+    case STEPS.SESSION:
+      return renderSessionSelection();
+    case STEPS.GATE:
+      return renderGateSelection();
+    case STEPS.SUMMARY:
+      return renderSummary();
+    default:
+      return null;
+  }
+};
+
+  const renderError = () => error && (
+    <View style={styles.errorContainer}>
+      <Text style={styles.errorText}>{error}</Text>
+    </View>
+  );
 
   return (
     <View style={styles.container}>
@@ -208,14 +269,21 @@ export default function Settings() {
               />
             ))}
           </View>
+          {renderError()}
           {renderCurrentStep()}
           {currentStep !== STEPS.SUMMARY && (
             <TouchableOpacity
-              style={styles.backButton}
-              onPress={() => setCurrentStep(prev => Math.max(0, prev - 1))}
+              style={[
+                styles.backButton,
+                currentStep === STEPS.DAY && styles.backButtonDisabled
+              ]}
+              onPress={handleBack}
               disabled={currentStep === STEPS.DAY}
             >
-              <Text style={styles.backButtonText}>Back</Text>
+              <Text style={[
+                styles.backButtonText,
+                currentStep === STEPS.DAY && styles.backButtonTextDisabled
+              ]}>Back</Text>
             </TouchableOpacity>
           )}
         </>
@@ -286,9 +354,10 @@ const styles = StyleSheet.create({
     marginTop: 30,
     padding: 15,
     alignItems: 'center',
+    color: 'white',
   },
   backButtonText: {
-    color: '#666',
+    color: '#f0f0f0',
     fontSize: 16,
   },
   summaryContainer: {
@@ -329,4 +398,33 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
+  
+  errorContainer: {
+    backgroundColor: '#ff000020',
+    padding: 10,
+    borderRadius: 8,
+    marginBottom: 20,
+    width: '100%',
+  },
+  errorText: {
+    color: '#ff0000',
+    textAlign: 'center',
+    fontSize: 14,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    color: 'white',
+    marginTop: 10,
+    fontSize: 16,
+  },
+  backButtonDisabled: {
+    opacity: 0.5,
+  },
+  backButtonTextDisabled: {
+    color: '#444',
+  }
 });
