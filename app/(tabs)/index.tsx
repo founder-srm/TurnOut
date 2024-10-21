@@ -1,4 +1,5 @@
 import { CameraView, useCameraPermissions } from 'expo-camera';
+import { RNCamera as Camera } from 'react-native-camera';
 import { useState } from 'react';
 import { View } from 'react-native';
 import { YStack, H1, XStack, Button as TamaguiButton, Text, Image } from 'tamagui';
@@ -7,18 +8,23 @@ import scanImg from '../../assets/qr-code-scan.png';
 import flipImg from '../../assets/flip.png';
 import flashImg from '../../assets/flash.png';
 import imgImg from '../../assets/image.png';
-import closeImg from '../../assets/close.png'; 
-import jsQR from 'jsqr'; 
+import closeImg from '../../assets/close.png';
+import jsQR from 'jsqr';
+import { useRouter } from 'expo-router';
 
 export default function Home() {
   const [facing, setFacing] = useState('back');
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
   const [image, setImage] = useState<string | null>(null);
+  const [qrLink, setQrLink] = useState('');
+  const [flash, setFlash] = useState(Camera.Constants.FlashMode.off);
+  const router = useRouter();
+  const [scanTime, setScanTime] = useState('');
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images, // We only need images for QR code scanning
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [4, 3],
       quality: 1,
@@ -27,11 +33,11 @@ export default function Home() {
     if (!result.canceled) {
       const uri = result.assets[0].uri;
       setImage(uri);
-      scanQRCodeFromImage(uri); // Scan the QR code from the image
+      scanQRCodeFromImage(uri);
     }
   };
 
-  const scanQRCodeFromImage = async (uri:any) => {
+  const scanQRCodeFromImage = async (uri: any) => {
     const response = await fetch(uri);
     const blob = await response.blob();
     const img = new Image();
@@ -42,13 +48,14 @@ export default function Home() {
       canvas.width = img.width;
       canvas.height = img.height;
       const ctx = canvas.getContext('2d');
-      ctx?.drawImage(img, 0, 0);
+      ctx.drawImage(img, 0, 0);
 
-      const imageData = ctx?.getImageData(0, 0, canvas.width, canvas.height);
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
       const qrCode = jsQR(imageData.data, canvas.width, canvas.height);
 
       if (qrCode) {
-        alert(`QR code data: ${qrCode.data}`);
+        setQrLink(qrCode.data);
+        router.push({ pathname: '/history', params: { qrLink: qrCode.data } });
       } else {
         alert('No QR code found in the image.');
       }
@@ -68,9 +75,13 @@ export default function Home() {
     );
   }
 
-  const handleBarCodeScanned = ({ type, data }:any) => {
-    setScanned(true); // Stop further scanning until reset
-    alert(`Bar code with type ${type} and data ${data} has been scanned!`);
+  const handleBarCodeScanned = ({ type, data }: any) => {
+    setScanned(true);
+    const currentTime = new Date();
+    const formattedTime = `${currentTime.toLocaleDateString()} ${currentTime.toLocaleTimeString()}`;
+    setScanTime(formattedTime);
+    alert(`Qr code with data ${data} has been scanned at ${formattedTime}`);
+    router.push({ pathname: '/history', params: { qrLink: data, scanTime: formattedTime } });
   };
 
   const toggleCameraFacing = () => {
@@ -78,26 +89,35 @@ export default function Home() {
   };
 
   const closeCamera = () => {
-    setScanned(false); // Reset scanning when camera is closed
+    setScanned(false);
   };
 
   const resetScan = () => {
-    setScanned(false); // Reset scanning when "Scan again" is pressed
+    setScanned(false);
   };
 
   const closeImage = () => {
-    setImage(null); // Close the uploaded image view
+    setImage(null);
+  };
+
+  const toggleFlash = () => {
+    setFlash((currentFlash: any) =>
+      currentFlash === Camera.Constants.FlashMode.off
+        ? Camera.Constants.FlashMode.torch
+        : Camera.Constants.FlashMode.off
+    );
   };
 
   return (
     <YStack flex={1}>
       <CameraView
-        onBarcodeScanned={scanned ? undefined : handleBarCodeScanned} // Allow scanning only if not already scanned
+        onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
         barcodeScannerSettings={{
           barcodeTypes: ['qr', 'pdf417'],
         }}
         style={{ position: 'absolute', width: '100%', height: '100%' }}
         facing={facing}
+        flashMode={flash}
       />
 
       <View
@@ -191,8 +211,9 @@ export default function Home() {
         gap={10}
         justifyContent="space-between"
         padding="$3"
-        right='$3'
-        marginTop="$7">
+        right="$3"
+        marginTop="$7"
+        marginLeft="$3">
         <TamaguiButton
           size="$5"
           borderColor="rgb(255, 196, 0)"
@@ -211,7 +232,7 @@ export default function Home() {
           size="$5"
           borderColor="rgb(255, 196, 0)"
           backgroundColor="#333"
-          onPress={toggleCameraFacing}>
+          onPress={toggleFlash}>
           <Image src={flashImg} height={40} width={40}></Image>
         </TamaguiButton>
         <TamaguiButton
